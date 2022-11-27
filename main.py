@@ -39,38 +39,35 @@ def list_data_base():
         'password':mysql_password,
         'database':mysql_database
     }
-    result = "ERRO", 500
+    result = [False, "ERRO", 500]
     try:
         conn = mysql.connector.connect(**data_base_config)
         print("Conexao bem sucedida")
     except mysql.connector.Error as err:
         if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
             print("ERRO: Nome ou senha do banco incorretas (permissao)")
-            result = "ERRO: Nome ou senha do banco incorretas (permissao)", 501
+            result = [False, "ERRO: Nome ou senha do banco incorretas (permissao)", 501]
         elif err.errno == errorcode.ER_BAD_DB_ERROR:
             print("ERRO: Banco não existe no servidor consultado")
-            result = "ERRO: Banco nao existe no servidor consultado", 502
+            result = [False, "ERRO: Banco nao existe no servidor consultado", 502]
         else:
             print("ERRO: não identificado no codigo")
             print(err)
-            result = "ERRO: não identificado no codigo", 503
+            result = [False, "ERRO: não identificado no codigo", 503]
     else:
         cursor = conn.cursor()
         print("Verificando registros na base")
         cursor.execute("SELECT * FROM dados_logon;")
         registers = cursor.fetchall()
         print("Resultado: ", cursor.rowcount, " registros.")
-        result = "<h1>Lista de resultados</h1>\n"
-        for register in registers:
-            result += "<b>N#: </b>" + str(register[0]) + \
-                      "<b>Serviço: </b>" + str(register[1]) + \
-                      "<b>User: </b>" + str(register[2]) + \
-                      "<b>Password: </b>" + str(register[3]) + "<br>\n"
+        #result = []
+        #for register in registers:
+        #    result.append(register)
         conn.commit()
         cursor.close()
         conn.close()
         print("Done.")
-        result = result, 200
+        result = [True, registers, 200]
     return result
 
 app.run(host='0.0.0.0', port=listar_pass_port, debug=False)
